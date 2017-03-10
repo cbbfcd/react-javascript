@@ -2,10 +2,10 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { createStore } from 'redux'
 import Counter from './components/Counter'
-import counter from './reducer/reduce'
+import reduce from './reducer/reduce'
 
 // 建立store,参数传reducer
-const store = createStore(counter)
+const store = createStore(reduce)
 
 // 获取render的位置
 const rootE1 = document.getElementById("app")

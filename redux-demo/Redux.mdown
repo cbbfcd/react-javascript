@@ -1,5 +1,4 @@
 
-> RuanYF
 ## Redux是什么?
 
 Redux 的适用场景：多交互、多数据源
@@ -130,4 +129,238 @@ Redux是一个web应用框架，状态管理工具
     }
    ```
 
-9.demo1 见件 redux-demo1
+9.demo1 见件 redux-demo
+
+
+
+10. 中间件 （middleware）
+    
+    中间件就是通过一个函数对现有的redux框架进行一些功能的拓展。
+    它作用在store.dispatch(action)，上，通过对这个方法的重新构造
+    实现功能的拓展，比如实现异步操作。
+    
+    中间件的使用:
+    1> 引入applyMiddleware(它是 Redux 的原生方法，作用是将所有中间件组成一个数组，依次执行)
+    ```
+    import { applyMiddleware, createStore } from 'redux';
+    ```
+    2> 装载中间件
+    ```
+    const store = createStore(
+      reducer,
+      applyMiddleware(some-middleware)
+    );
+    ```
+
+    注意:
+    1. 坑点1 createStore(),有三个函数，applyMiddleware(some-middleware)，是第三个。
+    
+    2. 坑点2 applyMiddleware(midd1,midd2,logger) 可以传入多个中间件，次序有的有要求，使用的时候要注意，比如logger只能放在最后。
+  
+11. 异步操作的两种方式
+
+    什么是异步?同步?
+
+    结合redux操作流程，同步指的是action一旦发出，立即执行reducer
+    算出new_state.
+    异步则是action发出之后，过段时间再reducer
+
+    实现异步:
+
+    1> 回调函数
+       
+       就像nodejs事件模型。回调函数是解决异步操作的基本方法
+
+       redux回调异步的思想:
+       
+       通过中间件redux-thunk，使得我们可以在dispatch()中传入函数作为参数。
+       所以我们需要做的就是编写一个函数，用dispatch,getState作为参数，里面定义异步的操作
+       
+       wonderful demo:
+       ```
+       const fetchPosts = postTitle => (dispatch, getState) => {
+          dispatch(requestPosts(postTitle));
+          return fetch(`/some/API/${postTitle}.json`)
+            .then(response => response.json())
+            .then(json => dispatch(receivePosts(postTitle, json)));
+          };
+        };
+
+        // 使用方法一
+        store.dispatch(fetchPosts('reactjs'));
+        // 使用方法二
+        store.dispatch(fetchPosts('reactjs')).then(() =>
+          console.log(store.getState())
+        );
+       ```
+
+
+    2> Promise
+
+       ES6提供了异步操作容器，虽然还不完善，至少是目前最好的异步解决方案之一。
+
+       我们需要使用redux-promise 中间件
+
+       这个中间件使得store.dispatch方法可以接受 Promise 对象作为参数
+        
+      type1:
+      ```
+      const fetchPosts = 
+        (dispatch, postTitle) => new Promise(function (resolve, reject) {
+           dispatch(requestPosts(postTitle));
+           return fetch(`/some/API/${postTitle}.json`)
+             .then(response => {
+               type: 'FETCH_POSTS',
+               payload: response.json()
+             });
+      });
+      ```
+
+      type2:
+
+      引入createAction,promise对象挂载到payload.
+      ```
+
+      import { createAction } from 'redux-actions';
+
+      class AsyncApp extends Component {
+        componentDidMount() {
+          const { dispatch, selectedPost } = this.props
+          // 发出同步 Action
+          dispatch(requestPosts(selectedPost));
+          // 发出异步 Action
+          dispatch(createAction(
+            'FETCH_POSTS', 
+            fetch(`/some/API/${postTitle}.json`)
+              .then(response => response.json())
+          ));
+        }
+      ```
+注意:createAction的第二个参数必须是一个 Promise 对象
+
+
+## react-redux
+
+redux和react-redux不是一个框架。
+
+react项目不一定要用react-redux,毕竟你还要多学react-redux的API.
+
+react-redux思想：
+
+把所有的react组件分为2种：
+   1. UI组件，也可以理解成纯粹的组件。就是没有this.state，不考虑生命周期，不调用redux API就只有props
+   2. 容器组件，不负责视图展现，只负责逻辑处理，数据交互，有状态，要调用redux API
+
+你可以这样去想象：
+
+容器组件就是包在UI组件外边的保护层，UI组件不直接与store进行交互获取更新。
+所以肯定有这么几个问题:
+1. 容器组件和UI组件 如何连接在一起?
+       
+React-Redux 提供connect方法，用于从 UI 组件生成容器组件。connect的意思，就是将这两种组件连起来。
+
+```
+       import { connect } from 'react-redux'
+       const rqcomponent = connect()(uicomponent);
+```
+
+
+
+2. 容器组件和UI组件已经store之间如何进行数据的交互，状态更新渲染视图?
+     
+mapStateToProps,mapDispatchToProps在创建容器组件的时候传入这两个参数即可。
+
+               
+```
+       import { connect } from 'react-redux'
+       const rqcomponent = connect(mapStateToProps,mapDispatchToProps)(uicomponent);
+```
+
+i. mapStateToProps(state,ownProps?)  reutrn {key:value}  key和UI组件同名参数对应
+ 
+就像名字表达的意思一样，是state->props的映射函数。
+也就是从外部(容器组件)->内部(UI组件)
+每当state更新的时候，就会自动执行，重新计算 UI 组件的参数，从而触发 UI 组件的重新渲染。
+
+使用ownProps作为参数后，如果容器组件的参数发生变化，也会引发 UI 组件重新渲染。
+connect方法可以省略mapStateToProps参数，那样的话，UI 组件就不会订阅Store，就是说 Store 的更新不会引起 UI 组件的更新
+
+其实质是告诉UI组件state的变化
+
+      demo：
+```
+        const mapStateToProps = (state) => {
+          return {
+            todos: getVisibleTodos(state.todos, state.visibilityFilter)
+          }
+        }
+
+        const getVisibleTodos = (todos, filter) => {
+          switch (filter) {
+            case 'SHOW_ALL':
+              return todos
+            case 'SHOW_COMPLETED':
+              return todos.filter(t => t.completed)
+            case 'SHOW_ACTIVE':
+              return todos.filter(t => !t.completed)
+            default:
+              throw new Error('Unknown filter: ' + filter)
+          }
+        }
+```
+
+ii. mapDispatchToProps(dispatch,ownProps)
+
+内部(UI组件)到外部(容器组件)
+其实就是往外部发送action的方法
+他可以是一个对象也可以是一个函数
+
+所以mapDispatchToProps定义的是一个action creater 函数
+键名也是对应 UI 组件的同名参数，键值应该是一个函数
+其实质是告诉外部组件UI VIEW的变化
+如下所示的onClick
+函数:
+```
+const mapDispatchToProps = (
+  dispatch,
+  ownProps
+) => {
+  return {
+    onClick: () => {
+      dispatch({
+        type: 'SET_VISIBILITY_FILTER',
+        filter: ownProps.filter
+      });
+    }
+  };
+}
+```
+
+对象:
+```
+const mapDispatchToProps = {
+  onClick: (filter) => {
+    type: 'SET_VISIBILITY_FILTER',
+    filter: filter
+  };
+}
+```
+
+3. provider
+
+```
+render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+)
+```
+
+实现机制是利用react的context属性
+
+可以不用每次都要一级一级的传入state，Provider包裹的所有组件都可以获取到store
+
+4. react-redux-demo
+
+见 react-redux-demo
