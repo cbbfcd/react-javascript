@@ -48,8 +48,8 @@ ReactDOM.render(
   <App/>
   ,
   document.querySelector('#app')
-);*/
-
+);
+*/
 // router实现
 import { Router, Route, Link,hashHistory,browserHistory } from 'react-router'
 import { IndexRoute,Redirect } from 'react-router'
@@ -142,7 +142,7 @@ ReactDOM.render(
 
         explain:
              /:  参数
-             ()  可选择
+             ()  可选择 
              *    任意（非贪婪）  eg  匹配<div>.*</div> 会匹配到最后
              **   任意(贪婪)
     10. history 是router的核心，router通过history监听地址栏的hashchange，然后把状态保存到location(state);
