@@ -77,6 +77,157 @@ let unuse3: void = undefined;
 
 // null or undefined
 
+// TypeScript 中，可以使用 null 和 undefined 来定义这两个原始数据类型
+
+let un: undefined = undefined;
+
+let nu: null = null;
+
+let nu2: null = 5;  // null 只能定义null, undefined同样
+
+let un1: undefined;
+
+let num9: number = un1;
+
+// 任意类型
+
+// TypeScript中可以用any表示任意类型。使其使用起来的效果就像js变量一样
+
+let any1: any = '123';
+
+any1 = 7;
+
+let any2: number = 123;
+
+any2 = '123';  // 如果不是使用any, 合理会报错。
+
+// 在任意值上访问任何属性都是允许的，对其任何操作返回的结果都是any的
+// 变量如果在声明的时候，未指定其类型，那么它会被识别为任意值类型
+
+let any3;  // 这里注意不能初始化，如果let any3 = '5'; 就不再是any；而是string了；
+           // TypeScript 会在没有明确的指定类型的时候推测出一个类型，这就是类型推论。
+any3 = 5;
+
+any3 = '5';
+
+// 最好的方式是杜绝这种声明但是不赋值和不确定type的写法。
+
+
+
+// 联合类型
+
+// 联合类型使用 | 分隔每个类型，表示类型只能是a |(或者) b
+
+let union: number | string = '5';
+
+union = 15;
+
+// 当 TypeScript 不确定一个联合类型的变量到底是哪个类型的时候，
+// 我们只能访问此联合类型的所有类型里共有的属性或方法.
+
+function getLength(something: string|number): number{
+	return something.length;
+}
+
+// 上述方法报错是因为不确定参数是string | number,而number是没有length属性的；
+
+function getString(something: string|number): string{
+	return something.toString();
+}
+
+// 上述方法访问 string 和 number 的共有属性是没问题的
+
+// 联合类型的变量在被赋值的时候，会根据类型推论的规则推断出一个类型
+
+console.log(union.length); // union 被推论为 number;
+
+
+// 接口
+
+// 那么对象的类型用什么定义呢？
+
+// TypeScript用interface来表示接口，接口的作用是定义对象的 type;
+
+// 以面向对象思想思考，接口封装的是抽象的公共的行为、动作。由具体的个体(class)去实现(implements);
+
+// TypeScript的接口还可以定义对象的属性、特征，对象的属性、特征必须保持和接口的一致,不能多也不能少
+
+interface Person{
+	name: string,
+	age: number
+}
+
+let guy: Person = {
+	name: 'jack',
+	age: 25
+}
+
+// 但是这样有时候会很麻烦，我们很多时候不需要都实现接口的属性，可以使用可选属性，就是加一个?
+// 这时可以少，但是还是不可以多
+interface Person2{
+	name: string,
+	age?: number
+}
+
+let guy2: Person2 = {
+	name: 'jack'
+}
+
+
+// 如果我们非要给它新增一个未定义的属性呢，我们可以使用任意属性
+
+interface Person3{
+	name: string,
+	age?: number,
+	[propName: string]: any  // 任意属性,要求该接口内的基本属性、可选属性都必须是它的子属性
+}
+
+let guy3: Person3= {
+	name: 'jack',
+	job:'jser',
+	address:'xxxxx'
+}
+
+
+interface Person4{
+	name: string,
+	age?: number, // type是number 并不是stirng的子属性，改成string 就可以了。
+	[propName: string]: string  // 任意属性,要求该接口内的基本属性、可选属性都必须是它的子属性
+}
+
+let guy4: Person4= {
+	name: 'jack',
+	job:'jser',
+	address:'xxxxx'
+}
+
+
+// 只读属性
+
+// 如果我们需要定义接口中的属性在初始化赋值之后就不可以被改变，就可以使用readonly表示只读属性。
+
+interface Animal{
+	type: string,
+	readonly id: number
+}
+
+let cat: Animal = {
+	type: 'miao',
+	id: 123 // 这里如果不给id初始化赋值，会报错
+}
+
+cat.id = 123;  // 报错， 因为 id 初始化后就变成只读属性了。
+
+// 
+
+
+
+
+
+
+
+
+
 
 
 
