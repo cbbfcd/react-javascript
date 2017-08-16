@@ -1,4 +1,5 @@
 
+
 // 1. 原始数据类型的ts表示
 
 // 布尔型
@@ -218,7 +219,194 @@ let cat: Animal = {
 
 cat.id = 123;  // 报错， 因为 id 初始化后就变成只读属性了。
 
-// 
+
+// 在typeScript中，对于数组的定义非常灵活
+
+// 1. 使用 类型 + [] 的方式来表示，类似于java那样
+
+let arr1: number[] = [1, 2, 3];
+let arr2: number[] = [1, 2, 3, '4']; // error
+
+// 联合类型数组
+let arr3: (number | string)[] = [1, 2, '3'];
+arr3.push(arr1);
+arr3.push(5);
+arr3.push('5');
+
+
+// 2. 使用泛型表示  Array<ElementType>
+
+let arry4: Array<number> = [1, 2, 3];
+
+// 3. 用接口表示数组
+
+interface numArray{
+	[index: number]: number // 意思是index和值都必须是数字
+}
+
+let numArr: numArray = [1, 2, '3'] // 只能是数字
+let numArr2: numArray = [1, 2, 3]
+let numArr3: numArray = {1:1,2:2} // 但是这貌似也满足
+
+
+// 4. 能装载各种数据类型的数组，就得使用我们之前学习的 any
+
+let anyArr: any[] = [1, 2, '123', {}];
+let anyArr2: Array<any> = [1, 2, '123', {}];
+
+// 5. 在TS中类数组不是数组，用数组的表示会出错，比如函数的参数
+
+function foo(){
+	let args: number[] = arguments;
+}
+
+
+// 函数声明与表达式
+
+// 函数的声明
+// 限定了参数的格式只能是number,返回值的类型也是number
+// 参数不能多，也不能少，bar(1,2,3)  bar(1) 都会报错
+function bar(x: number, y: number): number{
+	return x + y;
+}
+
+// 函数表达式
+
+let myFun = (x: number, y:number) => {
+	return x + y;
+}
+
+// 上面的表达式左边没有限定类型，会通过类型推导给一个类型；或者是直接给它写全了,但是忒麻烦
+let myFun2:(x: number, y: number) => number = function(x: number, y: number):number{
+	return x + y;
+}
+
+// 可选参数
+// 语法上也是加一个 ? , 写法的要求是必须写在后边，也就是说可选参数后边不能再跟一个必须参数了；
+
+function getMySum(x: number, y?: number){
+	if(y){
+		return x + y;
+	}else{
+		return x + 5;
+	}
+}
+getMySum(5);
+getMySum(5,12);
+
+
+
+function getMySum2(x: number, y?: number, z: number){ // z 报错
+	if(y){
+		return x + y;
+	}else{
+		return x + 5;
+	}
+}
+
+
+// 参数默认值
+// 在 ES6 中，我们允许给函数的参数添加默认值，TypeScript 会将添加了默认值的参数识别为可选参数
+// 此时就不再有可选参数后边不能再有必选参数的限制了
+
+function getName(firstName: string = 'liu', lastName: string){
+	if(lastName){
+		return firstName
+	}else{
+		return firstName + ' ' + lastName
+	}
+}
+
+getName(,'test'); // 第一个不传或者传一个undefined
+
+
+// 拓展剩余参数
+// 主要还是利用ES6的语法，记住 ...rest 只能反正最后一个参数的位置
+function makeArr(arr: Array<any>, ...rest: Array<any>){
+	if(rest.length){
+		rest.map((val, index)=>{
+			arr.push(val);
+		})
+	}
+}
+
+makeArr([], [1, 2, '3']);
+
+
+// 重载
+// 重载可以通俗的理解为传入不同的参数( 参数个数不同 | 类型不同 ),对应作出不同的处理，编译器会根据参数
+// 的个数，类型去匹配到对应的执行函数执行。
+// 前面写的两个reverse函数只有定义，没有实现，是为了重载的时候精确匹配返回值。
+// TypeScript 会优先从最前面的函数定义开始匹配，
+// 所以多个函数定义如果由包含关系，需要优先把精确的定义写在前面
+function reverse(a: number | string): number;
+function reverse(a: number | string): string;
+function reverse(a: number | string): number | string{
+	if(typeof a === 'string'){
+		return a.split('').reverse().join('');
+	}else if(typeof a === 'number'){
+		return Number((a.toString()).split('').reverse().join(''));
+	}
+}
+
+reverse(123);
+reverse('123')
+
+
+// 类型断言
+// 类型断言（Type Assertion）可以用来绕过编译器的类型推断，手动指定一个值的类型（即程序员对编译器断言）。
+// 语法 <类型>值
+// note: 在react的TSX语法则必须是 值 as 类型
+
+// 断言和测试中的断言使用理念差不多，其实就是假设一个类型，我断定他就是这个类型，不是就拉到。
+// 目的是为了解决一种问题，就是前边提到的联合类型，我不确定我的参数是什么类型，可能是 number
+// 还可能是 string ,直接调用 .length方法肯定会报错的，这个时候就可以用类型断言
+// 类型断言不是类型转换，断言成一个联合类型中不存在的类型是不允许的
+function testAssert(x: number | string): number{
+	if(x.length){
+		return x.length; // 报错。x不确定类型，只能使用公共属性
+	}else{
+		x.toString().length;
+	}
+}
+
+function testAssert2(x: number | string): number{
+	if((<string>x).length){
+		return (<string>x).length; // 编译通过，我断言它就是个string类型的
+	}else{
+		x.toString().length;
+	}
+}
+
+
+// 声明文件
+// 当使用第三方库时，我们需要引用它的声明文件，约定以 .d.ts结尾
+// 其实就是我们使用第三方库，但是TS并不认识它，比如 $ Jquery之类的，
+// 我们就需要 声明 他们，使用关键字 declare 
+declare var Jquery: (string) => any;
+
+// 这种声明我们一般单独放在一个 .d.ts文件中，这就是声明文件。
+// 社区推荐的方式还是通过 @types 来管理声明模块； 
+// 如： npm install @types/jquery --save-dev
+// 参考: https://blogs.msdn.microsoft.com/typescript/2016/06/15/the-future-of-declaration-files/
+
+
+// 内置对象
+// TS把JS、DOM、BOM中的内置对象都放进了它的核心库中，除了nodejs 的;
+// 要想使用TS写node,需要: npm install @types/node --save-dev
+// 具体的js内置对象，比如Error、Date、RegExp..., DOM/BOM内置对象 如: HTMLElement,Document...
+// 可参见MDN
+
+
+
+
+
+
+
+
+
+
+
 
 
 
