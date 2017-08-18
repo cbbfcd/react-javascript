@@ -1,5 +1,4 @@
 
-
 // 1. 原始数据类型的ts表示
 
 // 布尔型
@@ -154,8 +153,8 @@ console.log(union.length); // union 被推论为 number;
 // TypeScript的接口还可以定义对象的属性、特征，对象的属性、特征必须保持和接口的一致,不能多也不能少
 
 interface Person{
-	name: string,
-	age: number
+	name: string;
+	age: number;
 }
 
 let guy: Person = {
@@ -166,8 +165,8 @@ let guy: Person = {
 // 但是这样有时候会很麻烦，我们很多时候不需要都实现接口的属性，可以使用可选属性，就是加一个?
 // 这时可以少，但是还是不可以多
 interface Person2{
-	name: string,
-	age?: number
+	name: string;
+	age?: number;
 }
 
 let guy2: Person2 = {
@@ -178,9 +177,9 @@ let guy2: Person2 = {
 // 如果我们非要给它新增一个未定义的属性呢，我们可以使用任意属性
 
 interface Person3{
-	name: string,
-	age?: number,
-	[propName: string]: any  // 任意属性,要求该接口内的基本属性、可选属性都必须是它的子属性
+	name: string;
+	age?: number;
+	[propName: string]: any;  // 任意属性,要求该接口内的基本属性、可选属性都必须是它的子属性
 }
 
 let guy3: Person3= {
@@ -191,9 +190,9 @@ let guy3: Person3= {
 
 
 interface Person4{
-	name: string,
-	age?: number, // type是number 并不是stirng的子属性，改成string 就可以了。
-	[propName: string]: string  // 任意属性,要求该接口内的基本属性、可选属性都必须是它的子属性
+	name: string;
+	age?: number; // type是number 并不是stirng的子属性，改成string 就可以了。
+	[propName: string]: string;  // 任意属性,要求该接口内的基本属性、可选属性都必须是它的子属性
 }
 
 let guy4: Person4= {
@@ -208,8 +207,8 @@ let guy4: Person4= {
 // 如果我们需要定义接口中的属性在初始化赋值之后就不可以被改变，就可以使用readonly表示只读属性。
 
 interface Animal{
-	type: string,
-	readonly id: number
+	type: string;
+	readonly id: number;
 }
 
 let cat: Animal = {
