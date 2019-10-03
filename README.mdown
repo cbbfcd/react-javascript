@@ -1,5 +1,7 @@
 ## About
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/cbbfcd/react-javascript.svg)](https://greenkeeper.io/)
+
 该项目是一个资料整理项目。
 里面包含了对React全栈知识的学习笔记和资料收集。
 
