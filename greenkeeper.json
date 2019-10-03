@@ -1,0 +1,13 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "cdgmeq-dev-pro/package.json",
+        "react-redux-demo/package.json",
+        "redux-demo/package.json",
+        "router-demos/package.json",
+        "webpack-demos/package.json"
+      ]
+    }
+  }
+}
